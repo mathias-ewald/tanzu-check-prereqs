@@ -1,0 +1,9 @@
+- name: Checking permissions {{ verbs | join('|') | upper }} on {{ noun | upper }} {% if scope != 'None' %} in namespace {{ scope | upper }}{% endif %}
+  shell:
+    cmd: "kubectl auth can-i {{ verb }} {{ noun }} {% if scope != 'None' %}--namespace {{ scope }}{% endif %}"
+  register: result
+  failed_when: result.rc != 0 or 'no' in result.stdout_lines
+  changed_when: false
+  loop: "{{ verbs | list }}"
+  loop_control:
+    loop_var: verb

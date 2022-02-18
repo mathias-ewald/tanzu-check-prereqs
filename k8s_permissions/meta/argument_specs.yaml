@@ -1,0 +1,18 @@
+---
+argument_specs:
+  main:
+    options:
+      noun:
+        type: "str"
+        required: true
+        description: "The kubernets object type to check permissions for, e.g. 'pod'"
+      verbs:
+        type: "list"
+        elements: "str"
+        required: true
+        description: "The verbs to check for permission"
+      scope:
+        type: "str"
+        default: "None"
+        required: false
+        description: "The namespace in which to check permissions"

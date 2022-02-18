@@ -1,0 +1,170 @@
+---
+- name: Check Bootstrap Host Prerequisites
+  hosts: jumphost
+  remote_user: ubuntu
+  roles: []
+  tasks:
+  # # Carvel Tools
+  # - name: Check Carvel Versions
+  #   include_role:
+  #     name: command_version
+  #   vars:
+  #     command_name: "{{ item['cmd'] }}"
+  #     version_command: "{{ item['vers'] }}"
+  #     min_version: "{{ item['min'] | default('None') }}"
+  #   with_items: 
+  #   - cmd: ytt
+  #     vers: ytt --version | awk '{print $3}'
+  #     min: 0.34.0
+  #   - cmd: imgpkg
+  #     vers: imgpkg --version | grep version | awk '{print $3}'
+  #     min: 0.12.0
+  #   - cmd: kbld
+  #     vers: kbld --version
+  #   - cmd: kapp
+  #     vers: kapp --version
+  # # Tanzu Build Service
+  # - name: Check TBS Versions
+  #   include_role:
+  #     name: command_version
+  #   vars:
+  #     command_name: "{{ item['cmd'] }}"
+  #     version_command: "{{ item['vers'] }}"
+  #     min_version: "{{ item['min'] | default('None') }}"
+  #   with_items: 
+  #   - cmd: kp
+  #     vers: kp version | cut -d "-" -f 1
+  # # Kubernetes
+  # - name: Check kubectl
+  #   include_role:
+  #     name: command_version
+  #   vars:
+  #     command_name: "{{ item['cmd'] }}"
+  #     version_command: "{{ item['vers'] }}"
+  #     min_version: "{{ item['min'] | default('None') }}"
+  #   with_items: 
+  #   - cmd: kubectl
+  #     vers: kubectl version -o json | jq .clientVersion.gitVersion -r | sed 's/^v//' | sed 's/+.*$//'
+  - name: Get Cluster information
+    kubernetes.core.k8s_cluster_info: {}
+    register: api_status
+  - name: debug
+    debug:
+      var: api_status
+  - name: Check Kubernetes API Versions
+    ansible.builtin.assert:
+      that:
+      - "{{ api_status.version.server.kubernetes. version(min_version, '>=') }}"
+      msg: "Command {{ command_name | upper }} available at version {{ result.stdout }} with is not greater or equal to {{ min_version }}"
+
+  # - name: Check Kubernetes Permissions
+  #   include_role:
+  #     name: k8s_permissions
+  #   vars:
+  #     verbs: "{{ item['verbs'] | list }}"
+  #     noun: "{{ item['noun'] }}"
+  #     scope: "{{ item['scope'] | default('None') }}"
+  #   with_items: 
+  #   - noun: mutatingwebhookconfigurations
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: validatingwebhookconfigurations
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterroles
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterrolebindings
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: customresourcedefinitions
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: storageclasses
+  #     verbs: ["list", "get", "watch"]
+  #   - noun: builds
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: builds/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: builds/finalizers
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: images
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: images/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: images/finalizers
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: builders
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: builders/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterbuilders
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterbuilders/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterstores
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterstores/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterstacks
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: clusterstacks/status
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: sourceresolvers
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: sourceresolvers/staus
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: projects
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #   - noun: configmaps
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: secrets
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: serviceaccounts
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: services
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: namespaces
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: roles
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: rolebindings
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: deployments
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: daemonsets
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: build-service
+  #   - noun: services
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: serviceaccounts
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: namespaces
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: secrets
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: configmaps
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: roles
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: rolebindings
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: deployments
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: daemonsets
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kpack
+  #   - noun: configmaps
+  #     verbs: ["create", "list", "get", "update", "patch", "delete", "watch"]
+  #     scope: kapp

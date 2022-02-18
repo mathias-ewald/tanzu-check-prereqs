@@ -1,0 +1,20 @@
+- name: Retrieve {{ command_name | upper }} Version
+  shell:
+    cmd: "{{ version_command }}"
+  register: result
+  check_mode: false
+  changed_when: false
+  failed_when: result.rc != 0 and result.rc != 127
+
+- name: Check If {{ command_name | upper }} Exists
+  ansible.builtin.assert:
+    that:
+    - result.stdout != ""
+    msg: "Command {{ command_name }} does not exist"   
+
+- name: Check {{ command_name | upper }} Version {% if min_version != 'None' %}>= {{ min_version }}{% endif %}
+  ansible.builtin.assert:
+    that:
+    - "{{ result.stdout is version(min_version, '>=') }}"
+    msg: "Command {{ command_name | upper }} available at version {{ result.stdout }} with is not greater or equal to {{ min_version }}"
+  when: min_version != 'None'

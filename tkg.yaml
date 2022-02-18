@@ -1,0 +1,19 @@
+---
+- name: Check Bootstrap Host Prerequisites
+  hosts: jumphost
+  remote_user: root
+  vars:
+    ramsize_gb: "{{ (ansible_memtotal_mb/1024) | round(0, 'ceil') | int }}"
+  roles: []
+  tasks:
+  # System & Hardware
+  - name: Check CPU Count
+    ansible.builtin.assert:
+      that:
+      - (ansible_processor_nproc | int) >= 2
+      msg: "CPU core count must be larger or equal to 2 but is {{ ansible_processor_nproc }}"
+  - name: Check Memory Size
+    ansible.builtin.assert:
+      that:
+      - (ramsize_gb | int) >= 4
+      msg: "Memory must be larger or equal to 3 but is {{ ramsize_gb }}"

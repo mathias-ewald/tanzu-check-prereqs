@@ -1,0 +1,18 @@
+---
+argument_specs:
+  main:
+    options:
+      command_name:
+        type: "str"
+        required: true
+        description: "The name of the command to check"
+      version_command:
+        type: "str"
+        required: true
+        description: "Command to run to retrieve the version of the binary"
+      min_version:
+        type: "str"
+        default: "None"
+        required: false
+        description: "The expected minimum version"
+
